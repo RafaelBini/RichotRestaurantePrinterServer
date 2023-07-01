@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "dotenv-safe": "^8.2.0",
+    "firebase-admin": "^11.9.0",
+    "iconv-lite": "^0.6.3",
+    "ps-node": "^0.1.6",
+    "serialport": "^11.0.0"
+  }
+}
