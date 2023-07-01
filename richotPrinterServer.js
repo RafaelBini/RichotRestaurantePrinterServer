@@ -18,6 +18,13 @@ async function getPrinter() {
         return false;
     })
 
+    serialport.on('close', () => {
+        db.doc(`printer_server/main`).update({
+            lastCheck: FieldValue.serverTimestamp(),
+            status: 'stopped'
+        })
+    })
+
     return await new Promise(resolve => {
         const interval = setInterval(() => {
             if (serialport.isOpen) {
@@ -94,6 +101,8 @@ async function startRunning() {
         return false;
     }
 
+
+
     db.collection('printer_queue').where('status', '==', 'TO_PRINT').onSnapshot(snap => {
 
         try {
@@ -113,14 +122,9 @@ async function startRunning() {
                 printer.write(buffer, async error => {
                     if (error) {
                         console.log(`Falha ao tentar imprimir (${docChange.doc.id}): ` + error);
-                        await db.doc('printer_queue/' + docChange.doc.id).update({
-                            status: 'FAILED'
-                        })
                         return;
                     }
-                    await db.doc('printer_queue/' + docChange.doc.id).update({
-                        status: 'PRINTED'
-                    })
+                    await db.doc('printer_queue/' + docChange.doc.id).delete()
                 })
 
             }

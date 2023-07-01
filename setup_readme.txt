@@ -3,6 +3,7 @@
 2. Instalar o Git
 
 3. Clonar o repositorio em uma pasta bem sossegada (tipo C:/printerServer)
+git clone https://github.com/RafaelBini/RichotRestaurantePrinterServer.git
 
 4. Rodar o npm ci
 
