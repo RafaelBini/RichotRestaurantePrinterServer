@@ -1,2 +1,2 @@
 # RichotRestaurantePrinterServer
-tes
+test
