@@ -1,2 +1,0 @@
-From https://github.com/RafaelBini/RichotRestaurantePrinterServer
-   63bac14..94149d2  master     -> origin/master

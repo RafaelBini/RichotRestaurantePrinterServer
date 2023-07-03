@@ -1,4 +1,4 @@
-@echo off
+rem @echo off
 
 git fetch >output.txt 2>&1
 
