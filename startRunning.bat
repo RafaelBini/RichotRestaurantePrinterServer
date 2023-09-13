@@ -12,4 +12,4 @@ if %size% gtr 0 npm ci
 
 del output.txt
 
-start /B node "D:\dev\Richot\PrinterServer\runner.js"
+start /B node "runner.js"
