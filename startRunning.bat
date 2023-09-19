@@ -12,4 +12,6 @@ if %size% gtr 0 npm ci
 
 del output.txt
 
+taskkill /f /im node.exe
+
 start /B node "runner.js"
