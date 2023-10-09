@@ -3,18 +3,25 @@ var admin = require("firebase-admin");
 require('dotenv-safe').config();
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const iconv = require('iconv-lite');
+const logman = require('./logManager.js')
 
 var printer;
 
+process.on('uncaughtException', (error) => {
+    logman.log('PrinterServer: EXCEÇÃO NÃO TRATADA - PROCESSO ENCERRADO: ' + error.message);
+    process.exit(1);
+});
+
 async function getPrinter() {
+    logman.log('PrinterServer: Buscando impressora')
 
     var serialList = await SerialPort.list();
     if (serialList.length <= 0) {
-        console.log('Impressora nao encontrada')
+        logman.log('PrinterServer: Impressora nao encontrada')
         return false;
     }
     const serialport = new SerialPort({ path: serialList[0].path, baudRate: 9600 }, error => {
-        if (error) console.log('the error: ', error)
+        if (error) logman.log('PrinterServer: Falha ao criar SerialPort: ' + error.message)
         return false;
     })
 
@@ -28,14 +35,14 @@ async function getPrinter() {
     return await new Promise(resolve => {
         const interval = setInterval(() => {
             if (serialport.isOpen) {
-                console.log('impressora está aberta')
+                logman.log('PrinterServer: impressora está aberta')
                 clearInterval(interval);
                 resolve(serialport);
             }
             else {
-                console.log('impressora nao iniciada ainda')
+                logman.log('PrinterServer: impressora nao iniciada ainda')
             }
-        }, 500);
+        }, 1000);
     })
 
 
@@ -87,6 +94,8 @@ function getTextFromPedido(pedido) {
 
 async function startRunning() {
 
+    logman.log('PrinterServer: Iniciando printer server')
+
     // INICIALIZA O FIRESTORE
     var serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
     admin.initializeApp({
@@ -97,7 +106,7 @@ async function startRunning() {
     // INICIALIZA A IMPRESSORA
     printer = await getPrinter();
     if (!printer) {
-        console.log('Não foi possivel conectar-se à impressora')
+        logman.log('PrinterServer: Não foi possivel conectar-se à impressora - PROCESSO ENCERRADO')
         return false;
     }
 
@@ -116,12 +125,12 @@ async function startRunning() {
                     ...docChange.doc.data().pedido
                 }
 
-                console.log('imprimindo pedido', pedido.id)
+                logman.log('PrinterServer: imprimindo pedido ' + pedido.id)
 
                 const buffer = iconv.encode(getTextFromPedido(pedido), 'CP437');
                 printer.write(buffer, async error => {
                     if (error) {
-                        console.log(`Falha ao tentar imprimir (${docChange.doc.id}): ` + error);
+                        logman.log(`PrinterServer: Falha ao tentar imprimir (${docChange.doc.id}): ` + error);
                         return;
                     }
                     await db.doc('printer_queue/' + docChange.doc.id).delete()
@@ -130,7 +139,7 @@ async function startRunning() {
             }
         }
         catch (ex) {
-            console.log('Erro', ex)
+            logman.log('PrinterServer: Erro ao imprimir pedido na fila: ' + ex.message)
         }
 
 

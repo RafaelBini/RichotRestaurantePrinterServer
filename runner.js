@@ -3,12 +3,18 @@ const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 require('dotenv-safe').config();
 const { spawn } = require('child_process');
 const ps = require('ps-node');
+const logman = require('./logManager.js')
 
 var db;
 var status = ''
 
+process.on('uncaughtException', (error) => {
+    logman.log('Runner: EXCEÇÃO NÃO TRATADA - PROCESSO ENCERRADO: ' + error.message);
+    process.exit(1);
+});
+
 function iniciarProcesso() {
-    console.log('iniciando processo')
+    logman.log('Runner: Iniciando processo de printer server')
     const processo = spawn('node', [`${__dirname}\\richotPrinterServer.js`], {
         detached: true,
         stdio: 'ignore'
@@ -20,7 +26,7 @@ function iniciarProcesso() {
 async function verificar() {
     ps.lookup({ command: 'node' }, (err, processos) => {
         if (err) {
-            console.error('Erro ao listar os programas Node.js:', err);
+            logman.log('Runner: Erro ao listar os programas Node.js: ' + err.message);
             return;
         }
 
@@ -55,6 +61,9 @@ async function verificar() {
 }
 
 function startRunning() {
+    // LIMPA LOGS
+    logman.limparDadosAntigos()
+
     // INICIALIZA O FIRESTORE
     var serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
     admin.initializeApp({
@@ -64,7 +73,7 @@ function startRunning() {
 
     setInterval(() => {
         verificar()
-    }, 15000)
+    }, 5000)
 }
 
 
