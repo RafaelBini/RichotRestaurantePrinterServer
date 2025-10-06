@@ -9,10 +9,10 @@ git clone https://github.com/RafaelBini/RichotRestaurantePrinterServer.git
 
 5. Colocar o arquivo .env
 
-6. Adaptar o caminho do runner.js no bat
+6 Instalar pm2 (npm install -g pm2)
 
-7. Adaptar o caminho do bat no vbs
+7 Instalar pm2-windows-service (npm install -g pm2-windows-service)
 
-8. Importar o start_runner_task.xml
+8 pm2 start richotPrinterServer.js
 
-9. Adaptar o caminho do vbs na task
+9 pm2 save
